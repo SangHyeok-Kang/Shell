@@ -49,3 +49,106 @@ int main()
         handler(narg, argv);
     }
 }
+
+
+int getargs(char *cmd, char **argv){
+	int narg = 0;
+	
+	while(*cmd){
+		if(*cmd == '' || *cmd == '\t')
+			*cmd++ = '\0';
+		else{
+			argv[narg++] = cmd++;
+			while(*cmd != '\0' && *cmd != ''&&*cmd != '\t')
+			cmd++;
+		}
+	}
+	argv[narg] = NULL;
+	return narg;
+}
+
+void handler_SIGINT(int signo, pid_t pid){
+	if (kill(pidd, SIGTERM) != 0){
+		printf("\n");
+	}
+}
+
+void handler_SIGQUIT(int signo){
+	printf("Ctrl + Z \n");
+	printf("quit (core dumped)\n");
+	
+	exit(1);
+}
+
+void pwd(){
+	char *buf = (char *)malloc(sizeof(char)*(BUFSIZE));
+	
+	if(getcwd(buf,BUFSIZE)==NULL){
+		perror("(Error) Pwd");
+		exit(EXIT_FAILURE);
+	}
+	else
+		printf("%s \n",buf);
+	
+	free(buf);
+}
+
+void ls(int narg, char **argv){
+	char temp[256];
+	if(narg == 1){
+		getcwd(temp, 256);
+		printf("%s", temp);
+		argv[1] = temp;
+	}
+	
+	DIR *pdir;
+	struct dirent *pde;
+	int i = 0;
+	if((pdir = opendir(argv[1])) < 0) {
+		perror("(Error) Opendir: ");
+	}
+	printf("\n");
+	while((pde = readdir(pdir)) != NULL) {
+		printf("%-20s", pde->d_name);
+		if(++i % 3 == 0)
+			printf("\n");
+		}
+	printf("\n");
+	closedir(pdir);
+}
+
+void cd(int narg, char **argv){
+	if(narg == 1){
+		chdir("Home");
+	}
+	else{
+		if(chdir(argv[1]) == -1){
+			printf("%s : no search file or directory \n", argv[1]);
+		}
+	}
+}
+
+void mkdir_(int narg, char **argv){
+	umask(0);
+	if(argv)
+	
+	if(narg < 2)
+		fprintf(stderr, "Pathname does not exists \n");
+	else{
+		if(mkdir(argv[1], umask(0)) < 0) {
+			perror("(Error) mkdir");
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
