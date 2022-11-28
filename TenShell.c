@@ -17,18 +17,75 @@
 sigjmp_buf jbuf;
 pid_t pid;
 
+
+void handler(int narg, char **argv);
+//2번
+void launch(int narg, char **argv);
+//3번
+void handler_SIGINT(int signo, pid_t pid);
+void handler_SIGQUIT(int signo);
+//4번
+void redirection(int narg, char **argv);
+void pipe_launch(int narg, char **argv);
+//5번
+void ls(int narg, char **argv);
+void pwd();
+void cd(int narg, char **argv);
+void mkdir_(int narg, char **argv);
+void rmdir_(int narg, char **argv);
+void rmdir_rm(int narg, char **argv);
+void ln(int narg, char **argv);
+void cp(int narg, char **argv);
+void mv(int narg, char **argv);
+void cat(int narg, char **argv);
+
+char *substring(int start, int end, char * str);
+int getargs(char *cmd, char **argv);
+
 char path[BUFSIZE];
 
+
+
+int main()
+{
+	signal(SIGINT, handler_SIGINT);
+	signal(SIGTSTP, handler_SIGQUIT);
+
+	char buf[256];
+	char * argv[50];
+	int narg;
+	pid_t pid;
+
+	while (1)
+    	{
+		char *argv[50] = {'\0'};
+
+		getcwd(path, BUFSIZE);
+        	printf("%s$ ", path);
+        	gets(buf);
+
+        if(!strcmp(buf, "exit")) {
+			printf("Bye Bye shell :(\n");
+			exit(0);
+	}
+
+        else if(!strcmp(buf,"") || !strcmp(buf,"\t"))
+            	continue;
+
+        narg = getargs(buf, argv);
+        handler(narg, argv);
+    }
+}
 
 int getargs(char *cmd, char **argv){
 	int narg = 0;
 	
 	while(*cmd){
-		if(*cmd == '' || *cmd == '\t')
+		if(*cmd == ' ' || *cmd == '\t')
 			*cmd++ = '\0';
 		else{
 			argv[narg++] = cmd++;
-			while(*cmd != '\0' && *cmd != ''&&*cmd != '\t')
+			while(*cmd != '\0' && *cmd != ' '&&*cmd != '\t')
 			cmd++;
 		}
 	}
@@ -37,7 +94,7 @@ int getargs(char *cmd, char **argv){
 }
 
 void handler_SIGINT(int signo, pid_t pid){
-	if (kill(pidd, SIGTERM) != 0){
+	if (kill(pid, SIGTERM) != 0){
 		printf("\n");
 	}
 }
@@ -469,7 +526,7 @@ void launch(int narg, char **argv) {
     pid = fork();
     if (pid == 0){
         if(is_background){
-            printf("\nCREATE BACKGROUND PROCESS PID: %ld\n", (long)getpid());
+            printf("\n백그라운드 실행 PID: %ld\n", (long)getpid());
         }
 
         if(execvp(argv[0], argv) < 0) {
@@ -553,38 +610,6 @@ char *substring(int start, int end, char * str) {
     new[end-start+1] = 0;
     return new;
 }
-
-int main()
-{
-	signal(SIGINT, handler_SIGINT);
-	signal(SIGTSTP, handler_SIGQUIT);
-
-	char buf[256];
-	char * argv[50];
-	int narg;
-	pid_t pid;
-
-	while (1)
-    	{
-		char *argv[50] = {'\0'};
-
-		getcwd(path, BUFSIZE);
-        	printf("%s$ ", path);
-        	gets(buf);
-
-        if(!strcmp(buf, "exit")) {
-			printf("Bye Bye shell :(\n");
-			exit(0);
-	}
-
-        else if(!strcmp(buf,"") || !strcmp(buf,"\t"))
-            	continue;
-
-        narg = getargs(buf, argv);
-        handler(narg, argv);
-    }
-}
-
 
 
 
